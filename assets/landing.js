@@ -225,7 +225,10 @@
 
   function drawLogoFrame(timestamp) {
     if (!canvasWidth || !canvasHeight) resizeLogoCanvas();
-    if (canvasWidth && canvasHeight && logoImages.bgn.complete && logoImages.mitra.complete) {
+    var heroRect = hero ? hero.getBoundingClientRect() : null;
+    var isHeroVisible = heroRect && heroRect.bottom > -60 && heroRect.top < window.innerHeight + 60;
+
+    if (isHeroVisible && canvasWidth && canvasHeight && logoImages.bgn.complete && logoImages.mitra.complete) {
       if (logoSwitchStart) {
         var progress = Math.min((timestamp - logoSwitchStart) / logoSwitchDuration, 1);
         logoRotation = 360 * progress;
