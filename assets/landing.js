@@ -852,9 +852,9 @@
         });
         headingObserver.unobserve(el);
       });
-    }, { threshold: .15, rootMargin: "0px 0px -30px 0px" });
+    }, { threshold: .1, rootMargin: "0px 0px 40px 0px" });
 
-    document.querySelectorAll(".section-label, .content-section h2, .content-section p, .divisi-heading, .kebersamaan-heading").forEach(function (el) {
+    document.querySelectorAll(".section-label, .content-section h2, .content-section p, .divisi-heading, .kebersamaan-heading, .org-heading").forEach(function (el) {
       headingObserver.observe(el);
     });
 
@@ -866,13 +866,13 @@
         var items = group.querySelectorAll(".fact, .volunteer-card, .node, .info-card, .divisi-card, .gallery-item, .contact-list > *");
         if (items.length) {
           window.gsap.fromTo(items,
-            { opacity: 0, y: 48, scale: .93 },
+            { opacity: 0, y: 36, scale: .96 },
             {
               opacity: 1,
               y: 0,
               scale: 1,
-              duration: .8,
-              stagger: .08,
+              duration: .7,
+              stagger: .06,
               ease: "back.out(1.2)",
               overwrite: true
             }
@@ -880,9 +880,9 @@
         }
         gridObserver.unobserve(group);
       });
-    }, { threshold: .1, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: .05, rootMargin: "0px 0px 60px 0px" });
 
-    document.querySelectorAll(".facts, .volunteer-grid, .divisi-gallery, .gallery-grid, .info-grid, .org, .contact-list").forEach(function (group) {
+    document.querySelectorAll(".facts, .volunteer-grid, .divisi-gallery, .gallery-grid, .info-grid, .org, .org-group, .contact-list").forEach(function (group) {
       gridObserver.observe(group);
     });
   }

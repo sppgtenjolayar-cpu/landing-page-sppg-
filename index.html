@@ -131,9 +131,10 @@
     .motion-ready .content-section p,
     .motion-ready .content-section .divisi-heading,
     .motion-ready .content-section .kebersamaan-heading,
+    .motion-ready .content-section .org-heading,
     .motion-ready .content-section .fact,
     .motion-ready .content-section .volunteer-card,
-    .motion-ready .content-section .org-group,
+    .motion-ready .content-section .node,
     .motion-ready .content-section .info-card,
     .motion-ready .content-section .divisi-card,
     .motion-ready .content-section .gallery-item,
@@ -290,6 +291,11 @@
       .team-list{grid-template-columns:repeat(2,minmax(0,1fr))}
       .org{gap:20px}.org-row{gap:9px}
       .node{padding:14px 10px;font-size:.88rem}
+    }
+    @media(max-width:560px){
+      .org-row:not(.org-single):not(.org-team-grid){grid-template-columns:1fr}
+      .team-list{grid-template-columns:1fr}
+      .team-list li{font-size:.8rem}
     }
     @media(max-width:430px){
       .brand span{max-width:100%;white-space:nowrap;line-height:1.05}
