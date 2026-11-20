@@ -75,6 +75,8 @@
     .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,27,61,.68),rgba(6,27,61,.28) 65%,rgba(6,27,61,.55));pointer-events:none}
     .hero-copy{position:relative;z-index:20;max-width:580px}
     .eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+    .hero-eyebrow-row{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px}
+    .hero-eyebrow-row .eyebrow{margin-bottom:0}
     .eyebrow::before{content:"";width:38px;height:2px;background:var(--gold)}
     .hero h1{font:700 clamp(4.2rem,8vw,8.5rem)/.82 "Barlow Condensed",var(--display);letter-spacing:.015em;transform-origin:left center;transform-style:preserve-3d;animation:hero-title-3d 5.2s ease-in-out infinite;will-change:transform}
     .hero h1.is-sppg{font-size:clamp(2.2rem,4.2vw,4rem);line-height:.96;letter-spacing:.01em}
@@ -162,6 +164,7 @@
     .org-group{display:grid;gap:12px}
     .org-row{display:grid;grid-template-columns:repeat(var(--columns),minmax(0,1fr));align-items:start;gap:12px}
     .org-row.org-team-grid{grid-template-columns:minmax(0,1fr)}
+    .org-row.org-single{grid-template-columns:minmax(0,1fr);max-width:380px;margin:0 auto;width:100%}
     .node{min-width:0;min-height:92px;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.07);padding:16px 18px;text-align:center}
     .node.top{border:1px solid rgba(239,190,98,.7);background:rgba(239,190,98,.14);color:var(--cream)}
     .node.team{background:rgba(255,255,255,.045)}
@@ -227,7 +230,12 @@
     .contact-list{display:grid;gap:10px;margin-top:24px}
     .contact-list a,.contact-list div{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--border);padding:14px 0;color:var(--white);text-decoration:none}
     .contact-list span{color:var(--muted)}
-    footer{padding:22px 5%;border-top:1px solid var(--border);background:#061b3d;color:rgba(255,255,255,.55);font-size:.76rem;text-align:center}
+    footer{padding:24px 5%;border-top:1px solid var(--border);background:#061b3d;color:rgba(255,255,255,.65);font-size:.78rem;text-align:center}
+    .footer-content{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:18px}
+    .visitor-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(239,190,98,.3);border-radius:999px;background:rgba(239,190,98,.08);color:var(--cream);font-size:.78rem}
+    .visitor-badge b{color:var(--gold);font-family:var(--display);font-size:.95rem;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;display:inline-block;animation:live-pulse 2s infinite}
+    @keyframes live-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
 
     @media(prefers-reduced-motion:reduce){
       .page-loader{transition-duration:.24s}
@@ -278,7 +286,7 @@
       .node{min-width:0;width:100%}
     }
     @media(max-width:760px){
-      .org-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .org-row:not(.org-single):not(.org-team-grid){grid-template-columns:repeat(2,minmax(0,1fr))}
       .team-list{grid-template-columns:repeat(2,minmax(0,1fr))}
       .org{gap:20px}.org-row{gap:9px}
       .node{padding:14px 10px;font-size:.88rem}
@@ -331,7 +339,13 @@
     <section class="hero" id="beranda">
       <div class="particles-bg" id="particlesBg"></div>
       <div class="hero-copy">
-        <div class="eyebrow">Makan Bergizi Gratis</div>
+        <div class="hero-eyebrow-row">
+          <div class="eyebrow">Makan Bergizi Gratis</div>
+          <div class="visitor-badge" title="Total Pengunjung Real-Time">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span><b class="total-visitors-count">0</b> Pengunjung</span>
+          </div>
+        </div>
         <h1 id="heroTitle" class="is-sppg" aria-live="polite" aria-atomic="true"><span id="heroTitleFirst" data-shimmer="SPPG KUNINGAN">SPPG KUNINGAN</span><strong id="heroTitleSecond" data-shimmer="PANCALANG TENJOLAYAR">PANCALANG TENJOLAYAR</strong></h1>
         <p class="desc">SPPG KUNINGAN PANCALANG TENJOLAYAR menyiapkan, memasak, dan menyalurkan makanan bergizi untuk siswa dengan bahan pilihan, standar gizi, serta dukungan relawan lokal.</p>
         <a class="primary" href="#profil">Lihat Profil <b>+</b></a>
@@ -398,6 +412,12 @@
               <div class="node"><b>Pengawas Gizi</b><small>ANNISA SYARIF TOYIB</small></div>
               <div class="node"><b>Akuntan</b><small>APRIYANI ENDRA DEWI</small></div>
               <div class="node"><b>Aslap</b><small>DARAJAT</small></div>
+            </div>
+          </div>
+          <div class="org-group">
+            <div class="org-heading">Head Chef</div>
+            <div class="org-row org-single" style="--columns:1">
+              <div class="node"><b>Head Chef</b><small>KIRANA WINALDI</small></div>
             </div>
           </div>
           <div class="org-group">
@@ -513,7 +533,15 @@
     </section>
   </main>
 
-  <footer>© 2026 SPPG KUNINGAN PANCALANG TENJOLAYAR • Makan Bergizi Gratis</footer>
+  <footer>
+    <div class="footer-content">
+      <span>© 2026 SPPG KUNINGAN PANCALANG TENJOLAYAR • Makan Bergizi Gratis</span>
+      <div class="visitor-badge" title="Total Pengunjung Real-Time">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>Total Pengunjung: <b id="totalVisitors">0</b></span>
+      </div>
+    </div>
+  </footer>
 
   <!-- Firebase App & Database Compat SDK untuk Sinkronisasi Like Real-Time Global -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

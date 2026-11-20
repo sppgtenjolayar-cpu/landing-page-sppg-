@@ -658,6 +658,56 @@
     });
   }
 
+  // --- Total Pengunjung (Real-Time Visitor Counter via Firebase) ---
+  var visitorEl = document.getElementById("totalVisitors");
+  var visitorSessionKey = "sppg_visit_tracked_v1";
+
+  function updateVisitorUI(count) {
+    var formatted = Number(count || 0).toLocaleString("id-ID");
+    document.querySelectorAll(".total-visitors-count, #totalVisitors").forEach(function (el) {
+      el.textContent = formatted;
+    });
+  }
+
+  if (isFirebaseActive && firebaseDb) {
+    var visitorRef = firebaseDb.ref("sppg_total_visitors");
+
+    var alreadyTracked = false;
+    try {
+      alreadyTracked = sessionStorage.getItem(visitorSessionKey) === "true";
+    } catch (e) {}
+
+    // Tambah 1 kunjungan hanya jika sesi baru (tidak spam saat refresh)
+    if (!alreadyTracked) {
+      visitorRef.transaction(function (current) {
+        return (current || 0) + 1;
+      });
+      try {
+        sessionStorage.setItem(visitorSessionKey, "true");
+      } catch (e) {}
+    }
+
+    // Dengarkan perubahan real-time
+    visitorRef.on("value", function (snapshot) {
+      var val = snapshot.val();
+      updateVisitorUI(val || 1);
+    }, function (err) {
+      console.warn("[SPPG] Gagal sinkronisasi data pengunjung:", err);
+    });
+  } else {
+    // Fallback lokal jika Firebase belum aktif
+    var localVisitors = 1;
+    try {
+      localVisitors = parseInt(localStorage.getItem("sppg_local_visitors") || "1", 10);
+      if (!sessionStorage.getItem(visitorSessionKey)) {
+        localVisitors++;
+        localStorage.setItem("sppg_local_visitors", String(localVisitors));
+        sessionStorage.setItem(visitorSessionKey, "true");
+      }
+    } catch (e) {}
+    updateVisitorUI(localVisitors);
+  }
+
   function handleLikeClick(btn, key, event) {
     if (event) {
       event.preventDefault();
