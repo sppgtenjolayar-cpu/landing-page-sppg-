@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SPPG KUNINGAN PANCALANG TENJOLAYAR | Makan Bergizi Gratis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+  <style>
+    :root {
+      --navy:#082f63;
+      --navy-deep:#061b3d;
+      --gold:#efbe62;
+      --cream:#f7f3e8;
+      --white:#fff;
+      --muted:rgba(255,255,255,.72);
+      --glass:rgba(255,255,255,.08);
+      --border:rgba(255,255,255,.16);
+      --display:"Outfit",sans-serif;
+      --body:"Manrope",sans-serif;
+      --sppg-photo:url("assets/sppg-karangsembung-hd.jpg");
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--body);color:var(--white);background:var(--navy-deep)}
+    body.is-loading{overflow:hidden}
+    button,a{font:inherit}
+    :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+    .scroll-progress{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),#ffe8a8);transform-origin:left;transform:scaleX(0);z-index:999;pointer-events:none;box-shadow:0 0 10px rgba(239,190,98,.55);transition:transform .08s linear}
+    .page-loader{position:fixed;inset:0;z-index:300;display:grid;place-items:center;background:var(--navy-deep);transition:transform .7s cubic-bezier(.76,0,.24,1)}
+    .page-loader.is-leaving{transform:translateY(-100%)}
+    .loader-content{width:min(360px,calc(100% - 48px));text-align:center}
+    .loader-brand{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--cream);font:700 1rem var(--display)}
+    .loader-brand img{width:42px;height:42px;object-fit:contain}
+    .loader-caption{margin-top:22px;color:var(--muted);font-size:.78rem}
+    .loader-counter{margin-top:12px;color:var(--gold);font:700 2rem var(--display);font-variant-numeric:tabular-nums}
+    .loader-track{height:2px;margin-top:12px;overflow:hidden;background:rgba(255,255,255,.16)}
+    .loader-track span{display:block;width:0;height:100%;background:var(--gold)}
+
+    .header{
+      position:fixed;z-index:100;top:14px;left:50%;transform:translateX(-50%);
+      width:min(1120px,calc(100% - 28px));height:64px;
+      display:grid;grid-template-columns:minmax(0,1fr) auto auto;column-gap:16px;align-items:center;
+      padding:7px 12px 7px 14px;border:1px solid var(--border);border-radius:999px;
+      overflow:hidden;isolation:isolate;
+      background:rgba(255,255,255,.015);
+      box-shadow:0 14px 40px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(255,255,255,.1);
+    }
+    .header::before,.header::after{content:"";position:absolute;inset:0;pointer-events:none}
+    .header::before{z-index:0;background:radial-gradient(260px circle at var(--glass-x,50%) var(--glass-y,0%),rgba(255,255,255,.07),transparent 72%);transition:background .16s ease-out}
+    .header::after{z-index:1;inset:-80% auto -80% -55%;width:36%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.055),transparent);transform:skewX(-22deg);animation:liquid-glass-sheen 9s ease-in-out infinite}
+    @keyframes liquid-glass-sheen{0%,18%{left:-55%;opacity:0}30%{opacity:.8}65%{left:120%;opacity:.45}80%,100%{left:120%;opacity:0}}
+    .header>*{position:relative;z-index:2}
+    .brand{min-width:0;display:flex;align-items:center;gap:9px;font:700 .98rem var(--display);white-space:nowrap}
+    .brand span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+    .brand-mark{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#fff}
+    .brand-mark img{width:38px;height:38px;object-fit:contain}
+    .nav{position:relative;display:flex;align-items:center;gap:2px}
+    .nav-indicator{position:absolute;top:0;left:0;height:100%;border-radius:999px;background:var(--gold);pointer-events:none;transition:transform .35s cubic-bezier(.2,.8,.2,1),width .35s cubic-bezier(.2,.8,.2,1)}
+    .nav a{position:relative;z-index:1;padding:9px 11px;border-radius:999px;color:rgba(255,255,255,.72);text-decoration:none;font-size:.75rem;font-weight:700;transition:color .25s}
+    .nav a:hover,.nav a.active{color:var(--navy-deep)}
+    .header-action{justify-self:end;white-space:nowrap;border:0;border-radius:999px;padding:11px 15px;background:var(--gold);color:var(--navy-deep);font-size:.78rem;font-weight:800;cursor:pointer}
+
+    .hero{
+      position:relative;min-height:100vh;min-height:100dvh;overflow:hidden;
+      display:grid;grid-template-columns:minmax(300px,.9fr) minmax(330px,.75fr);align-items:center;
+      gap:20px;padding:110px max(5%,30px) 50px;
+      background:var(--sppg-photo),linear-gradient(135deg,#0a356e 0%,var(--navy) 54%,var(--navy-deep) 100%);
+      background-position:center 42%;background-size:cover;background-repeat:no-repeat;
+    }
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,27,61,.68),rgba(6,27,61,.28) 65%,rgba(6,27,61,.55));pointer-events:none}
+    .hero-copy{position:relative;z-index:20;max-width:580px}
+    .eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+    .eyebrow::before{content:"";width:38px;height:2px;background:var(--gold)}
+    .hero h1{font:700 clamp(4.2rem,8vw,8.5rem)/.82 "Barlow Condensed",var(--display);letter-spacing:.015em;transform-origin:left center;transform-style:preserve-3d;animation:hero-title-3d 5.2s ease-in-out infinite;will-change:transform}
+    .hero h1.is-sppg{font-size:clamp(2.2rem,4.2vw,4rem);line-height:.96;letter-spacing:.01em}
+    .hero h1.is-yayasan{font-size:clamp(2.8rem,5.5vw,5.8rem);line-height:.92;letter-spacing:.01em}
+    .hero h1 span{font-weight:700}
+    .hero h1 strong{font-weight:800}
+    .hero h1 span,.hero h1 strong{position:relative;display:block;animation:none}
+    .hero h1 span{color:#f2f5fb;-webkit-text-fill-color:#f2f5fb;-webkit-text-stroke:1px rgba(255,255,255,.7);transform:translateZ(12px);text-shadow:1px 2px 0 rgba(5,25,54,.3),2px 5px 12px rgba(5,25,54,.38)}
+    .hero h1 strong{color:#efbe62;-webkit-text-fill-color:#efbe62;-webkit-text-stroke:0;transform:translateZ(26px);text-shadow:1px 2px 0 rgba(92,56,8,.64),2px 4px 0 rgba(6,27,61,.3),0 12px 24px rgba(3,18,42,.26)}
+    .hero h1 span::after,.hero h1 strong::after{content:attr(data-shimmer);position:absolute;inset:0;display:block;pointer-events:none;white-space:nowrap;overflow:hidden;color:transparent;-webkit-text-fill-color:transparent;-webkit-text-stroke:0;font:inherit;letter-spacing:inherit;line-height:inherit;background-image:linear-gradient(110deg,transparent 39%,rgba(239,190,98,.24) 44%,rgba(255,255,255,.92) 48%,#fff 50%,rgba(255,255,255,.92) 52%,rgba(239,190,98,.3) 56%,transparent 61%);background-size:220% 100%;background-position:100% 0;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 5px rgba(255,255,255,.95)) drop-shadow(0 0 14px rgba(239,190,98,.8));animation:title-shimmer 21s linear infinite}
+    .hero h1 strong::after{animation-delay:10.5s}
+    @keyframes title-shimmer{
+      0%,14.2857%{background-position:100% 0}
+      100%{background-position:0 0}
+    }
+    @keyframes hero-title-3d{
+      0%,100%{transform:perspective(900px) rotateX(1deg) rotateY(-2deg) translateY(0) scale(1)}
+      50%{transform:perspective(900px) rotateX(-1deg) rotateY(2deg) translateY(-4px) scale(1.008)}
+    }
+    .desc{max-width:470px;margin-top:28px;color:var(--muted);font-size:1rem;line-height:1.75}
+    .primary{display:inline-flex;align-items:center;gap:14px;margin-top:24px;border:1px solid var(--border);border-radius:999px;background:rgba(6,27,61,.72);padding:7px 7px 7px 18px;color:#fff;text-decoration:none;font-weight:800}
+    .primary b{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:var(--gold);color:var(--navy-deep)}
+
+    .logo-stage{position:relative;z-index:20;height:76vh;min-height:500px;display:grid;place-items:center;perspective:1000px}
+    .logo-glow{position:absolute;width:min(44vw,540px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(239,190,98,.2),transparent 68%);animation:glow-pulse 4.8s ease-in-out infinite}
+    @keyframes glow-pulse{0%,100%{opacity:.65;transform:scale(.96)}50%{opacity:1;transform:scale(1.05)}}
+    .disc{position:relative;width:min(44vw,540px);min-width:320px;aspect-ratio:1;border:0;border-radius:50%;background:transparent;cursor:pointer;transform-style:preserve-3d}
+    .logo-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;transform-style:preserve-3d;filter:drop-shadow(0 4px 1px rgba(4,24,43,.32)) drop-shadow(0 14px 9px rgba(2,16,36,.28)) drop-shadow(0 30px 24px rgba(2,16,36,.24));will-change:transform}
+    .mitra-face{border-radius:50%;text-align:center}
+    .logo-caption{position:absolute;bottom:4%;left:50%;transform:translateX(-50%);padding:8px 13px;border:1px solid var(--border);border-radius:999px;background:rgba(6,27,61,.74);color:var(--muted);font-size:.72rem;white-space:nowrap}
+
+    .particles,.particles-bg{position:absolute;inset:0;pointer-events:none}
+    .particles{z-index:30}.particles-bg{z-index:10}
+    .particle{position:absolute;width:var(--size);height:var(--size)}
+    .shape{position:relative;display:block;width:100%;height:100%;transform-origin:center;transition:transform .1s linear}
+    .dot{border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff1bc,var(--gold) 50%,#9d762f)}
+    .ring{border:2px solid rgba(239,190,98,.75);border-radius:50%}
+    .ring::after{content:"";position:absolute;inset:23%;border:1px solid rgba(255,255,255,.55);border-radius:50%}
+    .leaf{border-radius:100% 0 100% 0;background:linear-gradient(135deg,#d9e8a7,#89b86b 58%,#477b48);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+    .leaf::after{content:"";position:absolute;top:12%;left:49%;width:1px;height:78%;background:rgba(255,255,255,.62);transform:rotate(38deg);transform-origin:top}
+    .orb{border-radius:50%;background:radial-gradient(circle at 28% 25%,#fff8dd 0 8%,#f4d184 25%,#d19b42 62%,#855c24 100%);box-shadow:inset -2px -3px 5px rgba(57,36,9,.35),0 3px 9px rgba(0,0,0,.24)}
+    .globe{overflow:hidden;border:1px solid rgba(129,185,220,.9);border-radius:50%;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.85),rgba(99,165,204,.68) 18%,rgba(18,76,122,.8) 70%);box-shadow:0 2px 9px rgba(2,16,36,.25)}
+    .globe::before,.globe::after{content:"";position:absolute;inset:8% 30%;border:1px solid rgba(237,246,255,.62);border-radius:50%}
+    .globe::after{inset:35% 4%;border-left:0;border-right:0}
+    .star,.spark{display:grid;place-items:center;color:#ffe4a0;text-shadow:0 2px 8px rgba(239,190,98,.65)}
+    .star::before{content:"✦";font-size:calc(var(--size) * .9);line-height:1}
+    .spark::before{content:"✧";font-size:calc(var(--size) * 1.15);line-height:1}
+
+    section.content-section{position:relative;padding:105px max(5%,30px);scroll-margin-top:130px}
+    .motion-ready .content-section .section-label,
+    .motion-ready .content-section h2,
+    .motion-ready .content-section p,
+    .motion-ready .content-section .divisi-heading,
+    .motion-ready .content-section .kebersamaan-heading,
+    .motion-ready .content-section .fact,
+    .motion-ready .content-section .volunteer-card,
+    .motion-ready .content-section .org-group,
+    .motion-ready .content-section .info-card,
+    .motion-ready .content-section .divisi-card,
+    .motion-ready .content-section .gallery-item,
+    .motion-ready .content-section .contact-list > * {
+      opacity: 0;
+      transform: translateY(38px);
+      will-change: opacity, transform;
+    }
+    .section-shell{width:min(1120px,100%);margin:auto}
+    .section-label{color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .content-section h2{margin-top:10px;font:800 clamp(2.5rem,5vw,4.7rem)/1 var(--display);letter-spacing:-.04em}
+    .content-section p{color:rgba(255,255,255,.68);line-height:1.75}
+    .profil{background:#f4f0e5;color:var(--navy-deep)}
+    .profil p{color:#4d5f70}
+    .profil-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:42px;align-items:center}
+    .facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .fact{min-height:145px;border:1px solid #d9d2c2;border-radius:22px;background:#fff;padding:20px}
+    .fact small{color:#71808c}.fact b{display:block;margin-top:22px;color:var(--navy);font:800 2.5rem var(--display)}
+
+    .relawan{background:#082f63}
+    .volunteer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:32px}
+    .volunteer-card{min-height:175px;border:1px solid var(--border);border-radius:20px;background:var(--glass);padding:22px}
+    .volunteer-card b{display:block;margin-bottom:12px;color:var(--gold);font:800 1.05rem var(--display)}
+    .volunteer-card span{color:var(--muted);font-size:.86rem;line-height:1.6}
+
+    .struktur{background:#061b3d}
+    .org{display:grid;gap:26px;margin-top:34px}
+    .org-group{display:grid;gap:12px}
+    .org-row{display:grid;grid-template-columns:repeat(var(--columns),minmax(0,1fr));align-items:start;gap:12px}
+    .org-row.org-team-grid{grid-template-columns:minmax(0,1fr)}
+    .node{min-width:0;min-height:92px;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.07);padding:16px 18px;text-align:center}
+    .node.top{border:1px solid rgba(239,190,98,.7);background:rgba(239,190,98,.14);color:var(--cream)}
+    .node.team{background:rgba(255,255,255,.045)}
+    .node b{display:block}.node small{display:block;margin-top:5px;color:var(--muted);font-size:.78rem;line-height:1.55}
+    .node.team{display:block;align-self:start;text-align:left}
+    .node.team>b{text-align:center}
+    .team-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;gap:8px;margin:14px 0 0;padding:0;list-style:none;counter-reset:team-member}
+    .team-list li{counter-increment:team-member;display:flex;align-items:center;gap:10px;min-height:42px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(255,255,255,.045);padding:8px 10px;color:var(--cream);font-size:.76rem;line-height:1.4}
+    .team-list li::before{content:counter(team-member);flex:0 0 24px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:rgba(239,190,98,.16);color:var(--gold);font-size:.68rem;font-weight:800}
+    .org-heading{color:var(--gold);font-size:.7rem;font-weight:800;letter-spacing:.13em;text-align:center;text-transform:uppercase}
+
+    .keterangan{background:#f4f0e5;color:var(--navy-deep)}
+    .keterangan p,.kontak p{color:#607080}
+    .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:28px}
+    .info-card{border:1px solid #ddd5c4;border-radius:18px;background:#fff;padding:18px}
+    .info-card small{display:block;color:#7b8993;margin-bottom:7px}.info-card b{font-size:.92rem}
+
+    .kebersamaan{isolation:isolate;overflow:hidden;background:radial-gradient(42rem circle at 92% 18%,rgba(239,190,98,.14),transparent 68%),linear-gradient(135deg,#082f63,#061b3d 78%);color:#fff}
+    .kebersamaan .section-shell{position:relative;z-index:1}
+    .kebersamaan .section-label{display:flex;align-items:center;gap:12px}
+    .kebersamaan .section-label::after{content:"";width:min(140px,22vw);height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+    .kebersamaan p{color:rgba(255,255,255,.72)}
+    .gallery-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:68px;gap:14px;margin-top:36px}
+    .gallery-item{position:relative;min-width:0;grid-column:span 3;grid-row:span 3;border:1px solid rgba(255,255,255,.2);border-radius:20px;overflow:hidden;background:#0b2850;box-shadow:0 14px 32px rgba(0,0,0,.2);isolation:isolate;transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
+    .gallery-item:first-child{grid-column:span 6;grid-row:span 4}
+    .gallery-item:last-child{grid-column:span 6;grid-row:span 3}
+    .gallery-item:hover{transform:translateY(-5px);border-color:rgba(239,190,98,.75);box-shadow:0 22px 42px rgba(0,0,0,.34)}
+    .gallery-photo{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;overflow:hidden;background:#0b2850;padding:0;cursor:zoom-in}
+    .gallery-photo img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .65s cubic-bezier(.2,.8,.2,1),filter .4s}
+    .gallery-photo:hover img{transform:scale(1.07);filter:saturate(1.12)}
+    .gallery-like{position:absolute;z-index:4;right:14px;bottom:14px;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(6,27,61,.62);backdrop-filter:blur(8px);padding:8px 12px;color:#fff;font-size:.82rem;font-weight:800;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+    .gallery-like:hover{transform:scale(1.04);border-color:rgba(255,255,255,.5);background:rgba(6,27,61,.86)}
+    .gallery-like .like-heart{color:#fff;font-size:1.15rem;line-height:1;transition:transform .2s,color .2s}
+    .gallery-like[aria-pressed="true"] .like-heart{color:#ff7189;transform:scale(1.18)}
+    .gallery-like:active .like-heart{transform:scale(1.3)}
+
+    .divisi-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;margin-bottom:52px}
+    .divisi-card{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:4/3;cursor:zoom-in;isolation:isolate;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 28px rgba(0,0,0,.18);transition:transform .4s cubic-bezier(.2,.8,.2,1),border-color .35s,box-shadow .35s}
+    .divisi-card:hover{transform:translateY(-6px) scale(1.015);border-color:rgba(239,190,98,.65);box-shadow:0 20px 44px rgba(0,0,0,.32)}
+    .divisi-card img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .6s cubic-bezier(.2,.8,.2,1),filter .4s}
+    .divisi-card:hover img{transform:scale(1.08);filter:saturate(1.1)}
+    .divisi-card::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(6,27,61,.82) 0%,rgba(6,27,61,.35) 38%,transparent 65%);pointer-events:none;transition:background .3s}
+    .divisi-card:hover::after{background:linear-gradient(to top,rgba(6,27,61,.88) 0%,rgba(6,27,61,.28) 42%,transparent 68%)}
+    .divisi-label{position:absolute;z-index:3;bottom:0;left:0;right:0;padding:16px 22px 48px;pointer-events:none}
+    .divisi-label-title{display:block;color:#fff;font:800 1.2rem var(--display);letter-spacing:.01em;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+    .divisi-like{position:absolute;z-index:4;right:14px;bottom:14px;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(6,27,61,.62);backdrop-filter:blur(8px);padding:8px 12px;color:#fff;font-size:.82rem;font-weight:800;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+    .divisi-like:hover{transform:scale(1.04);border-color:rgba(255,255,255,.5);background:rgba(6,27,61,.86)}
+    .divisi-like .like-heart{color:#fff;font-size:1.15rem;line-height:1;transition:transform .2s,color .2s}
+    .divisi-like[aria-pressed="true"] .like-heart{color:#ff7189;transform:scale(1.18)}
+    .divisi-like:active .like-heart{transform:scale(1.3)}
+    .divisi-heading{margin-top:40px;margin-bottom:4px;color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+    .divisi-heading::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(239,190,98,.5),transparent)}
+
+    .kebersamaan-heading{margin-top:12px;margin-bottom:4px;color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+    .kebersamaan-heading::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(239,190,98,.5),transparent)}
+    .photo-dialog{width:min(1100px,calc(100% - 28px));max-height:calc(100dvh - 28px);border:0;border-radius:18px;padding:0;background:#061b3d;overflow:hidden}
+    .photo-dialog::backdrop{background:rgba(2,12,28,.88);backdrop-filter:blur(8px)}
+    .photo-dialog img{width:100%;max-height:calc(100dvh - 28px);display:block;object-fit:contain}
+    .photo-close{position:absolute;top:12px;right:12px;width:42px;height:42px;border:1px solid rgba(255,255,255,.25);border-radius:50%;background:rgba(6,27,61,.88);color:#fff;font-size:1.35rem;cursor:pointer}
+
+    .kontak{background:linear-gradient(135deg,#082f63,#061b3d)}
+    .kontak-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:end}
+    .contact-list{display:grid;gap:10px;margin-top:24px}
+    .contact-list a,.contact-list div{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--border);padding:14px 0;color:var(--white);text-decoration:none}
+    .contact-list span{color:var(--muted)}
+    footer{padding:22px 5%;border-top:1px solid var(--border);background:#061b3d;color:rgba(255,255,255,.55);font-size:.76rem;text-align:center}
+
+    @media(prefers-reduced-motion:reduce){
+      .page-loader{transition-duration:.24s}
+      .face,.face img{transition-duration:.2s}
+      .header::after{animation:none}
+      html{scroll-behavior:auto}
+    }
+
+    @media(max-width:1100px){
+      .header{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);column-gap:10px}
+      .nav{justify-self:stretch;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}
+      .nav::-webkit-scrollbar{display:none}
+      .brand{font-size:.88rem}.brand-mark{width:38px;height:38px;flex:0 0 38px}.brand-mark img{width:34px;height:34px}
+      .nav a{white-space:nowrap;padding-right:7px;padding-left:7px;font-size:.7rem}.header-action{display:none}
+      .team-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    @media(max-width:1000px){
+      .header{grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)}
+    }
+    @media(max-width:900px){
+      .hero{grid-template-columns:1fr;align-content:start;gap:0;padding:125px 5% 40px}
+      .hero-copy{width:100%;max-width:680px}
+      .logo-stage{height:clamp(300px,58vw,470px);min-height:0;margin-top:8px}
+      .logo-glow{width:min(58vw,470px)}
+      .disc{width:min(58vw,430px);min-width:280px}
+    }
+    @media(max-width:760px){
+      .header{top:8px;left:8px;transform:none;width:calc(100% - 16px);height:auto;min-height:94px;grid-template-columns:1fr;gap:4px;padding:6px;border-radius:20px}
+      .brand{font-size:.82rem}.brand span{white-space:nowrap}.brand-mark{width:38px;height:38px;flex:0 0 38px}.brand-mark img{width:34px;height:34px}
+      .nav{justify-self:stretch;width:100%;overflow-x:auto;justify-content:flex-start;padding:3px}
+      .nav a{font-size:.65rem;padding:8px 9px}
+      .hero{padding:132px 5% 40px}
+      .hero-copy{max-width:100%}.hero h1{font-size:clamp(3.3rem,13vw,5.2rem)}.hero h1.is-sppg{font-size:clamp(1.75rem,7vw,2.9rem)}.hero h1.is-yayasan{font-size:clamp(2.15rem,8.2vw,3.6rem)}
+      .eyebrow{font-size:.58rem}.desc{max-width:270px;font-size:.76rem;line-height:1.55}
+      .primary{font-size:.75rem}.primary b{width:36px;height:36px}
+      .logo-stage{width:100%;height:clamp(280px,72vw,410px);margin-top:0}
+      .logo-glow{width:min(78vw,390px)}.disc{width:min(76vw,350px);min-width:250px}
+      .logo-caption{display:none}
+      section.content-section{padding:82px 5% 70px;scroll-margin-top:130px}
+      .profil-grid,.kontak-grid,.volunteer-grid,.info-grid{grid-template-columns:1fr}
+      .divisi-gallery{grid-template-columns:repeat(2,1fr);gap:12px}
+      .gallery-grid{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:60px;gap:12px}
+      .gallery-item{grid-column:span 3;grid-row:span 3}
+      .gallery-item:first-child{grid-column:span 6;grid-row:span 4}
+      .gallery-item:last-child{grid-column:span 6;grid-row:span 3}
+      .volunteer-grid{grid-template-columns:repeat(2,1fr)}
+      .facts{grid-template-columns:repeat(2,1fr)}
+      .node{min-width:0;width:100%}
+    }
+    @media(max-width:760px){
+      .org-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .team-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .org{gap:20px}.org-row{gap:9px}
+      .node{padding:14px 10px;font-size:.88rem}
+    }
+    @media(max-width:430px){
+      .brand span{max-width:100%;white-space:nowrap;line-height:1.05}
+      .hero-copy{max-width:100%}.hero h1{font-size:3.25rem}.hero h1.is-sppg{font-size:clamp(1.65rem,7vw,1.95rem)}.hero h1.is-yayasan{font-size:clamp(2rem,8.2vw,2.45rem)}.desc{max-width:100%}
+      .logo-stage{height:78vw;min-height:270px;max-height:340px}
+      .logo-glow{width:82vw}.disc{width:78vw;min-width:260px}
+      .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:68px;gap:10px}
+      .gallery-item{grid-column:span 1;grid-row:span 2;border-radius:16px}
+      .gallery-item:first-child,.gallery-item:last-child{grid-column:span 2;grid-row:span 3}
+      .gallery-like{right:9px;bottom:9px;padding:7px 10px}
+      .divisi-like{right:9px;bottom:9px;padding:7px 10px}
+      .volunteer-grid{grid-template-columns:1fr}
+      .divisi-gallery{grid-template-columns:1fr;gap:10px}
+      .divisi-label-title{font-size:1.05rem}
+      .fact{min-height:120px}.fact b{font-size:2rem}
+    }
+  </style>
+</head>
+<body class="is-loading">
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <div class="page-loader" id="pageLoader" aria-label="Memuat halaman">
+    <div class="loader-content">
+      <div class="loader-brand"><img src="assets/bgn-logo.png" alt=""><span>SPPG Karangsembung</span></div>
+      <p class="loader-caption">Menyiapkan layanan bergizi untuk semua</p>
+      <div class="loader-counter" id="loaderCounter">000</div>
+      <div class="loader-track"><span id="loaderProgress"></span></div>
+    </div>
+  </div>
+  <header class="header">
+    <div class="brand">
+      <div class="brand-mark"><img src="assets/bgn-logo.png" alt="Logo Badan Gizi Nasional"></div>
+      <span>SPPG KUNINGAN PANCALANG TENJOLAYAR</span>
+    </div>
+    <nav class="nav" aria-label="Menu utama">
+      <a class="active" href="#beranda">Beranda</a>
+      <a href="#profil">Profil</a>
+      <a href="#relawan">Divisi</a>
+      <a href="#struktur">Struktur</a>
+      <a href="#kebersamaan">Galeri</a>
+      <a href="#keterangan">Keterangan</a>
+      <a href="#kontak">Kontak</a>
+    </nav>
+    <button class="header-action" onclick="location.href='#kontak'">Hubungi SPPG</button>
+  </header>
+
+  <main>
+    <section class="hero" id="beranda">
+      <div class="particles-bg" id="particlesBg"></div>
+      <div class="hero-copy">
+        <div class="eyebrow">Makan Bergizi Gratis</div>
+        <h1 id="heroTitle" class="is-sppg" aria-live="polite" aria-atomic="true"><span id="heroTitleFirst" data-shimmer="SPPG KUNINGAN">SPPG KUNINGAN</span><strong id="heroTitleSecond" data-shimmer="PANCALANG TENJOLAYAR">PANCALANG TENJOLAYAR</strong></h1>
+        <p class="desc">SPPG KUNINGAN PANCALANG TENJOLAYAR menyiapkan, memasak, dan menyalurkan makanan bergizi untuk siswa dengan bahan pilihan, standar gizi, serta dukungan relawan lokal.</p>
+        <a class="primary" href="#profil">Lihat Profil <b>+</b></a>
+      </div>
+
+      <div class="logo-stage">
+        <div class="logo-glow"></div>
+        <button class="disc" id="disc" aria-label="Logo BGN dan Yayasan Sophia. Klik untuk menukar logo yang terlihat.">
+          <canvas class="logo-canvas" id="logoCanvas" role="img" aria-label="Logo Badan Gizi Nasional dengan efek liquid reveal Yayasan Sophia"></canvas>
+        </button>
+        <div class="logo-caption">Klik logo untuk mengganti penampilan</div>
+      </div>
+      <div class="particles" id="particles"></div>
+    </section>
+
+    <section class="content-section profil" id="profil">
+      <div class="section-shell profil-grid">
+        <div>
+          <div class="section-label">Tentang kami</div>
+          <h2>Profil SPPG</h2>
+          <p style="margin-top:20px">SPPG KUNINGAN PANCALANG TENJOLAYAR adalah satuan pelayanan pemenuhan gizi yang menyiapkan, memasak, dan mendistribusikan makanan bergizi setiap hari sekolah.</p>
+          <p style="margin-top:12px">Pelayanan mengutamakan mutu bahan, kebersihan dapur, ketepatan porsi, dan keterlibatan tenaga serta relawan dari sekitar kita.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><small>Penerima manfaat</small><b>2562</b></div>
+          <div class="fact"><small>KPM yang di layani</small><b>30</b></div>
+          <div class="fact"><small>Staf dan relawan</small><b>48</b></div>
+          <div class="fact"><small>Beroperasi sejak</small><b>2025</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section relawan" id="relawan">
+      <div class="section-shell">
+        <div class="section-label">TEAM</div>
+        <h2>DIVISI SPPG</h2>
+        <p style="max-width:650px;margin-top:16px">Relawan mendampingi proses dapur dengan pembagian tugas yang aman, terarah, dan sesuai standar operasional.</p>
+        <div class="volunteer-grid">
+          <div class="volunteer-card"><b>Persiapan</b><span>Mencuci, memotong, dan menata bahan makanan.</span></div>
+          <div class="volunteer-card"><b>Pengolahan</b><span>Memasak makanan sesuai resep dan standar gizi.</span></div>
+          <div class="volunteer-card"><b>Pemorsian</b><span>Memastikan porsi, kemasan, label, dan higienitas paket.</span></div>
+          <div class="volunteer-card"><b>Distribusi</b><span>Mengantar paket makanan ke sekolah tepat waktu.</span></div>
+          <div class="volunteer-card"><b>Cuci Ompreng</b><span>Mencuci dan mempersiapkan alat makan.</span></div>
+          <div class="volunteer-card"><b>Kebersihan</b><span>Menjaga kebersihan area dapur dan distribusi.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section struktur" id="struktur">
+      <div class="section-shell">
+        <div class="section-label">Organisasi</div>
+        <h2>Struktur Organisasi</h2>
+        <div class="org">
+          <div class="org-group">
+            <div class="org-heading">Pimpinan</div>
+            <div class="org-row" style="--columns:2">
+              <div class="node top"><b>Ketua Yayasan</b><small>EVI TRIKUSUMA DEWI</small></div>
+              <div class="node top"><b>Kepala SPPG</b><small>HEN HEN HENDRIYANSYAH</small></div>
+            </div>
+          </div>
+          <div class="org-group">
+            <div class="org-heading">Staff</div>
+            <div class="org-row" style="--columns:3">
+              <div class="node"><b>Pengawas Gizi</b><small>ANNISA SYARIF TOYIB</small></div>
+              <div class="node"><b>Akuntan</b><small>APRIYANI ENDRA DEWI</small></div>
+              <div class="node"><b>Aslap</b><small>DARAJAT</small></div>
+            </div>
+          </div>
+          <div class="org-group">
+            <div class="org-heading">Administrasi</div>
+            <div class="org-row" style="--columns:2">
+              <div class="node"><b>Admin</b><small>MUHAMMAD ADZIKRI</small></div>
+              <div class="node"><b>Admin Gudang</b><small>SITI MARPUAH</small></div>
+            </div>
+          </div>
+          <div class="org-group">
+            <div class="org-heading">Tim Operasional</div>
+            <div class="org-row org-team-grid">
+              <div class="node team"><b>Persiapan</b><ol class="team-list"><li>YANAH SEPTIANAH</li><li>MUSLIHATI</li><li>SRI PUJIARTI</li><li>SULIPAH</li><li>SITI RUM</li><li>NURSEHA</li><li>MIMI RUSMIATI</li><li>AAN SUHANI</li></ol></div>
+              <div class="node team"><b>Pengolahan</b><ol class="team-list"><li>LENNY NURAENI</li><li>NUR HARYANI</li><li>IRWAN GUSTRIANA</li><li>SITI SEKARWULAN</li><li>RAYA MELIASARI</li><li>SURYANA</li><li>NURAMALIA</li><li>RUHAYATI</li><li>RIKO PRIYANTO</li></ol></div>
+              <div class="node team"><b>Pemorsian</b><ol class="team-list"><li>NURHAYATI</li><li>YOYOH KODARIAH</li><li>RIKA ANJELIKA</li><li>ELMA SUTRIANI</li><li>MOZZA ALMALYAZAHRA</li><li>RATNA DEWI</li><li>DEYA SUCI LESTARI</li><li>YANAH MARYANAH</li><li>JAJA SUKARJA</li></ol></div>
+              <div class="node team"><b>Distribusi</b><ol class="team-list"><li>SANUSI</li><li>ASEP SAEPUDIN</li><li>YUDI WAHYUDI</li><li>ZAENUDIN</li></ol></div>
+              <div class="node team"><b>Cuci Ompreng</b><ol class="team-list"><li>DAIMAN HARDIANA</li><li>PUTRI HAMIDAH</li><li>RIKA RACHMAWATI</li><li>YANI SURYANI</li><li>ERNAWATI</li><li>SITI PATONAH</li><li>NURELAH</li><li>LESSY DACOSTA</li><li>IMANUDIN IMAM</li><li>DADANG HADIANA</li><li>YAYAH ASIAH</li></ol></div>
+              <div class="node team"><b>Kebersihan</b><ol class="team-list"><li>AGENG WARDANA</li></ol></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section kebersamaan" id="kebersamaan">
+      <div class="section-shell">
+        <div class="section-label">Dokumentasi</div>
+        <h2>Galeri</h2>
+        <p style="max-width:650px;margin-top:16px">Momen pelaksanaan kegiatan, persiapan dapur, pengolahan makanan, dan pendistribusian untuk siswa penerima manfaat.</p>
+
+        <div class="divisi-heading">Foto Divisi</div>
+        <div class="divisi-gallery" aria-label="Galeri foto divisi">
+          <div class="divisi-card" onclick="openDivisiPhoto(this)">
+            <img src="assets/foto/PERSIAPAN.jpeg" alt="Divisi Persiapan" loading="lazy">
+            <div class="divisi-label"><span class="divisi-label-title">Persiapan</span></div>
+            <button class="divisi-like" type="button" aria-pressed="false" data-key="divisi-persiapan"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button>
+          </div>
+          <div class="divisi-card" onclick="openDivisiPhoto(this)">
+            <img src="assets/foto/PENGOLAHAN.jpeg" alt="Divisi Pengolahan" loading="lazy">
+            <div class="divisi-label"><span class="divisi-label-title">Pengolahan</span></div>
+            <button class="divisi-like" type="button" aria-pressed="false" data-key="divisi-pengolahan"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button>
+          </div>
+          <div class="divisi-card" onclick="openDivisiPhoto(this)">
+            <img src="assets/foto/PEMORSIAN.jpeg" alt="Divisi Pemorsian" loading="lazy">
+            <div class="divisi-label"><span class="divisi-label-title">Pemorsian</span></div>
+            <button class="divisi-like" type="button" aria-pressed="false" data-key="divisi-pemorsian"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button>
+          </div>
+          <div class="divisi-card" onclick="openDivisiPhoto(this)">
+            <img src="assets/foto/DISTRIBUSI.jpeg" alt="Divisi Distribusi" loading="lazy">
+            <div class="divisi-label"><span class="divisi-label-title">Distribusi</span></div>
+            <button class="divisi-like" type="button" aria-pressed="false" data-key="divisi-distribusi"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button>
+          </div>
+          <div class="divisi-card" onclick="openDivisiPhoto(this)">
+            <img src="assets/foto/PENCUCI%20ALAT%20MAKAN.jpeg" alt="Divisi Cuci Ompreng" loading="lazy">
+            <div class="divisi-label"><span class="divisi-label-title">Cuci Ompreng</span></div>
+            <button class="divisi-like" type="button" aria-pressed="false" data-key="divisi-cuci-ompreng"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button>
+          </div>
+          <div class="divisi-card" onclick="openDivisiPhoto(this)">
+            <img src="assets/foto/ADMIN.jpeg" alt="ADMIN IZIN TAMPIL" loading="lazy">
+            <div class="divisi-label"><span class="divisi-label-title">ADMIN IZIN TAMPIL</span></div>
+            <button class="divisi-like" type="button" aria-pressed="false" data-key="divisi-admin"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button>
+          </div>
+        </div>
+
+        <div class="kebersamaan-heading">Kebersamaan</div>
+        <div class="gallery-grid" aria-label="Galeri foto kegiatan">
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 1"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.23.56.jpeg" alt="Kegiatan SPPG Kuningan Pancalang Tenjolayar" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-1"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 2"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.24.22.jpeg" alt="Kegiatan bersama tim SPPG" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-2"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 3"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.26.39.jpeg" alt="Aktivitas layanan makanan bergizi" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-3"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 4"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.27.28.jpeg" alt="Tim SPPG dalam kegiatan kebersamaan" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-4"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 5"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.27.32.jpeg" alt="Persiapan dan pelayanan makanan" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-5"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 6"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.30.19.jpeg" alt="Dokumentasi tim SPPG" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-6"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 7"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.30.40.jpeg" alt="Aktivitas kebersamaan relawan" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-7"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 8"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.31.07.jpeg" alt="Kegiatan operasional SPPG" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-8"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 9"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.31.31.jpeg" alt="Tim SPPG bersiap melayani" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-9"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+          <article class="gallery-item"><button class="gallery-photo" type="button" aria-label="Buka foto kebersamaan 10"><img src="assets/Kebersamaan/WhatsApp%20Image%202026-11-20%20at%2015.31.42.jpeg" alt="Tim SPPG berfoto bersama di depan spanduk milangkala" loading="lazy"></button><button class="gallery-like" type="button" aria-pressed="false" data-key="kebersamaan-10"><span class="like-heart" aria-hidden="true">♡</span><span class="like-count">0</span></button></article>
+        </div>
+      </div>
+    </section>
+
+    <dialog class="photo-dialog" id="photoDialog" aria-label="Pratinjau foto">
+      <button class="photo-close" type="button" aria-label="Tutup foto">&times;</button>
+      <img id="photoPreview" src="" alt="">
+    </dialog>
+
+    <section class="content-section keterangan" id="keterangan">
+      <div class="section-shell">
+        <div class="section-label">Informasi layanan</div>
+        <h2>Keterangan</h2>
+        <div class="info-grid">
+          <div class="info-card"><small>Nama SPPG</small><b>SPPG Kuningan Pancalang Tenjolayar</b></div>
+          <div class="info-card"><small>Lokasi</small><b>Desa Tenjolayar, Kec. Pancalang, Kab. Kuningan</b></div>
+          <div class="info-card"><small>Wilayah layanan</small><b>Kuningan, Pancalang, Tenjolayar</b></div>
+          <div class="info-card"><small>Jam distribusi</small><b>Hari sekolah</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section kontak" id="kontak">
+      <div class="section-shell kontak-grid">
+        <div>
+          <div class="section-label">Informasi kontak</div>
+          <h2>Hubungi Kami</h2>
+        </div>
+        <div class="contact-list">
+          <div><b>Alamat</b><span>Desa Tenjolayar, Kec. Pancalang, Kab. Kuningan</span></div>
+          <a href="https://wa.me/6282234506745" target="_blank" rel="noopener noreferrer"><b>WhatsApp</b><span>0822-3450-6745</span></a>
+          <a href="https://instagram.com/sppgsopiatenjolayar" target="_blank"><b>Instagram</b><span>@sppgsopiatenjolayar</span></a>
+          <a href="https://www.tiktok.com/@sppgsopiatenjolayar" target="_blank" rel="noopener noreferrer"><b>TikTok</b><span>@sppgsopiatenjolayar</span></a>
+          <a href="mailto:email-sppgkuninganpancalangtenjola@gmail.com"><b>Email</b><span>email-sppgkuninganpancalangtenjola@gmail.com</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2026 SPPG KUNINGAN PANCALANG TENJOLAYAR • Makan Bergizi Gratis</footer>
+
+  <!-- Firebase App & Database Compat SDK untuk Sinkronisasi Like Real-Time Global -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="assets/landing.js"></script>
+</body>
+</html>
